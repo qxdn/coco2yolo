@@ -9,10 +9,9 @@ if __name__ == '__main__':
     os.chdir(root_path)
     image_file = []
     for dir in os.listdir(train_img_path):
-        class_path = os.path.join(train_img_path,dir)
-        for filename in os.listdir(class_path):
+        for filename in os.listdir(train_img_path):
             if filename.endswith('.jpg'):
-                image_filename = os.path.join(class_path,filename)
+                image_filename = os.path.join(train_img_path,filename)
                 image_file.append(image_filename)
     with open('train.txt','w') as f:
         for image in image_file:
