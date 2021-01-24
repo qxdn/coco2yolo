@@ -12,7 +12,8 @@ if __name__ == '__main__':
         class_path = os.path.join(train_img_path,dir)
         for filename in os.listdir(class_path):
             if filename.endswith('.jpg'):
-                image_file.append(train_img_path+'\\'+filename)
+                image_filename = os.path.join(class_path,filename)
+                image_file.append(image_filename)
     with open('train.txt','w') as f:
         for image in image_file:
             f.write(image)
