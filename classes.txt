@@ -3,3 +3,4 @@ bicycle
 car
 motorcycle
 bus
+trunk
