@@ -67,7 +67,6 @@ if __name__ == '__main__':
             img_savepath = os.path.join(
                 img_dir, img['file_name'])  # 图片保存位置
             io.imsave(img_savepath, I)  # 保存
-            print(img_savepath)
             # 获取所有可能的标签id
             catIds = coco.getCatIds(catNms=categories)
             # 标签id
