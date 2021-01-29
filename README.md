@@ -6,6 +6,7 @@ using coco's json convert limited images and classes to yolo format
 
 ## install
 ```python
+git clone https://github.com/qxdn/coco2yolo.git
 pip install -r requirements.txt
 ```
 
@@ -15,7 +16,11 @@ pip install git+https://github.com/philferriere/cocoapi.git#subdirectory=PythonA
 ```
 
 ### How to use
-before use, you need to download [annotations](http://images.cocodataset.org/annotations/annotations_trainval2017.zip),then you need to change `LIMIT`、`datatype` and so on in`coco2yolo.py`，also change the categories which you want in `classes.txt`. using `generate_train.py` and `generate_val.py` to generate `train.txt` and `val.txt`
+changed `classes.txt`
+```python
+python coco2yolo.py -l 100 -t train
+python generate.py -t train
+```
 
 ```
 - HOMEDIR/
@@ -33,8 +38,5 @@ before use, you need to download [annotations](http://images.cocodataset.org/ann
    |    val.txt
    classes.txt
    coco2yolo.py
-   generate_train.py
-   generate_val.py
-
-     
+   generate.py
 ```

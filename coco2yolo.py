@@ -1,4 +1,5 @@
 # coding=utf-8
+from collections import defaultdict
 from pycocotools.coco import COCO
 import os
 import random
@@ -6,12 +7,7 @@ import skimage.io as io
 from progress.bar import Bar
 
 
-HOMEDIR = os.path.dirname((os.path.realpath(__file__)))  # 当前目录
-LIMIT = 2  # 每个类别的下载限制
-datatype = 'val2017'  # json格式
-ann_file = '%s/annotations/instances_%s.json' % (HOMEDIR, datatype)
-SAVEDIR = os.path.join(HOMEDIR, 'dataset/val')  # 保存路径
-img_dir = SAVEDIR
+
 
 
 def get_classes():
@@ -44,8 +40,31 @@ def convert(img, ann):
     h = h*dh
     return (x_center, y_center, w, h)
 
+def get_args():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-l','--limit',help="download images number of each categories",type=int,default=2)
+    parser.add_argument('-t','--type',help='the type of annotations',choices=['train','val'],default='train')
+
+    return parser.parse_args()
+
 
 if __name__ == '__main__':
+    args = get_args()
+
+    if args.limit <= 0:
+        print('download limits must larger than zero')
+        exit(1)
+
+    limit = args.limit
+    HOMEDIR = os.path.dirname((os.path.realpath(__file__)))  # 当前目录
+    datatype = args.type + '2017'  # json格式
+    ann_file = '%s/annotations/instances_%s.json' % (HOMEDIR, datatype)
+    SAVEDIR = os.path.join(HOMEDIR, 'dataset/'+args.type)  # 保存路径
+    img_dir = SAVEDIR
+
     categories = get_classes()  # 类别
 
     # 创建目录
@@ -58,7 +77,7 @@ if __name__ == '__main__':
     for index, cat in enumerate(categories):
         catIds = coco.getCatIds(catNms=[cat])  # 对应的分类id
         imgIds = coco.getImgIds(catIds=catIds)  # 图片id
-        imgIds = random.sample(imgIds, min(LIMIT, len(imgIds)))  # 取一小部分图片id
+        imgIds = random.sample(imgIds, min(limit, len(imgIds)))  # 取一小部分图片id
         # 获取一个类别图的id
         for imgId in Bar('downloading and converting %s' % (cat)).iter(imgIds):
             img = coco.loadImgs(imgId)[0]  # 获取图片信息
