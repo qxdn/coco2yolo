@@ -4,20 +4,21 @@ from pycocotools.coco import COCO
 import os
 import random
 import skimage.io as io
-from progress.bar import Bar
+from tqdm import tqdm
 
 
+classes = ['person',
+           'bicycle',
+           'car',
+           'motorcycle',
+           'bus',
+           'truck'
+           ]
 
+counter = {}
 
-
-def get_classes():
-    categories = []
-    with open('classes.txt', 'r') as f:
-        for index, line in enumerate(f):
-            line = line.rstrip("\n")
-            categories.append(line)
-        f.close()
-    return categories
+for c in classes:
+    counter[c] = 0
 
 
 def convert(img, ann):
@@ -40,13 +41,16 @@ def convert(img, ann):
     h = h*dh
     return (x_center, y_center, w, h)
 
+
 def get_args():
     import argparse
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-l','--limit',help="download images number of each categories",type=int,default=2)
-    parser.add_argument('-t','--type',help='the type of annotations',choices=['train','val'],default='train')
+    parser.add_argument(
+        '-l', '--limit', help="download images number of each categories", type=int, default=2)
+    parser.add_argument('-t', '--type', help='the type of annotations',
+                        choices=['train', 'val'], default='train')
 
     return parser.parse_args()
 
@@ -65,7 +69,7 @@ if __name__ == '__main__':
     SAVEDIR = os.path.join(HOMEDIR, 'dataset/'+args.type)  # 保存路径
     img_dir = SAVEDIR
 
-    categories = get_classes()  # 类别
+    categories = classes  # 类别
 
     # 创建目录
     if not os.path.exists(img_dir):
@@ -79,7 +83,9 @@ if __name__ == '__main__':
         imgIds = coco.getImgIds(catIds=catIds)  # 图片id
         imgIds = random.sample(imgIds, min(limit, len(imgIds)))  # 取一小部分图片id
         # 获取一个类别图的id
-        for imgId in Bar('downloading and converting %s' % (cat)).iter(imgIds):
+        pbar = tqdm(imgIds)
+        pbar.set_description("Processing %s" % cat)
+        for imgId in pbar:
             img = coco.loadImgs(imgId)[0]  # 获取图片信息
             I = io.imread(img['coco_url'])
             # 保存位置
@@ -88,9 +94,9 @@ if __name__ == '__main__':
             io.imsave(img_savepath, I)  # 保存
             # 获取所有可能的标签id
             catIds = coco.getCatIds(catNms=categories)
-            # 标签id
+            # 标签id 不要crowd
             annIds = coco.getAnnIds(
-                imgIds=img['id'], catIds=catIds, iscrowd=None)
+                imgIds=img['id'], catIds=catIds, iscrowd=0)
             # 标签
             anns = coco.loadAnns(annIds)
             # 标签保存
@@ -101,7 +107,14 @@ if __name__ == '__main__':
                     yolo_ann = convert(img, ann)
                     category_id = ann['category_id']
                     cat_name = coco.loadCats(category_id)[0]['name']
+                    counter[cat_name] += 1
                     cat_index = categories.index(cat_name)
                     f.write(str(cat_index)+' ' +
                             ' '.join([str(a) for a in yolo_ann])+'\n')
                 f.close()
+
+    print(counter)
+    filename = 'counter.txt'
+    with open(filename, 'w') as f:
+        for k, v in counter.items():
+            f.write("{}:{}\n".format(k, v))
