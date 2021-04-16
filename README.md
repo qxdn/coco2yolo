@@ -36,7 +36,7 @@ python generate.py -t train
    |    |   ******.txt
    |    train.txt
    |    val.txt
-   classes.txt
    coco2yolo.py
    generate.py
+   removeNoLabelFile.py
 ```
